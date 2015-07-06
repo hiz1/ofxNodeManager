@@ -1,24 +1,33 @@
 #include "ofApp.h"
 
 ofImage image;
-class ImageNode : public ofxManagedNode {
+class ImageNode : public ofNode {
 public:
     ImageNode() {
         if(!image.isAllocated()) {
             image.loadImage("of.png");
             image.setAnchorPercent(0.5, 0.5);
         }
+    }
+    
+    virtual void customDraw() {
+        image.draw(0,0);
+    }
+
+};
+
+class ManagedImageNode : public ImageNode, public ofxManagedNode {
+public:
+    ManagedImageNode() {
         count = 0;
+        setNode(new ImageNode());
     }
     virtual void update() {
-        tilt(1);
+        node()->tilt(1);
         count ++;
         if(count > 120) {
             setDeleted();
         }
-    }
-    virtual void customDraw() {
-        image.draw(0,0);
     }
 private:
     int count;
@@ -33,9 +42,9 @@ void ofApp::setup(){
 void ofApp::update(){
     manager.update();
     
-    ofPtr<ImageNode> img = ofPtr<ImageNode>(new ImageNode());
-    img->setPosition(ofRandom(ofGetWidth()), ofRandom(ofGetHeight()), 0);
-    img->setScale(0.2);
+    ofPtr<ManagedImageNode> img = ofPtr<ManagedImageNode>(new ManagedImageNode());
+    img->node()->setPosition(ofRandom(ofGetWidth()), ofRandom(ofGetHeight()), 0);
+    img->node()->setScale(0.2);
     manager.nodes().push_back(img);
 }
 
